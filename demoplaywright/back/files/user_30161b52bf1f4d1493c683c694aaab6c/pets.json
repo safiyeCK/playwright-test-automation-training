@@ -1,0 +1,11 @@
+[
+  {
+    "Id": 1,
+    "Type": "pets",
+    "name": "fikkie",
+    "age": 3,
+    "sex": "Male",
+    "needsAWalkOutside": true,
+    "ownerId": 1
+  }
+]

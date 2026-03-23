@@ -1,0 +1,27 @@
+{
+  "name": "playwright",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "installWebsite": "npm run installBackend && npm run installFrontend",
+    "installBackend": "npm --prefix ./demoplaywright/back install && npm --prefix ./demoplaywright/back run build",
+    "installFrontend": "npm --prefix ./demoplaywright/vite-app install",
+    "runWebsite": "npm run runBackend && npm run runFrontend",
+    "runBackend": "Start powershell -NoExit -Command \"npm --prefix ./demoplaywright/back run dev\"",
+    "runFrontend": "start powershell -NoExit -Command \"npm --prefix ./demoplaywright/vite-app run dev\"",
+    "clearDatabase": "start powershell  -Command \"npm --prefix ./demoplaywright/back run clearDatabase\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "@types/node": "^25.3.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "dotenv": "^17.3.1"
+  }
+}
