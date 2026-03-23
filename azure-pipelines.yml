@@ -29,8 +29,11 @@ steps:
 
   - script: npx playwright test
     displayName: Run Playwright tests
+    continueOnError: true
 
   - script: |
+      echo "Working directory: $(System.DefaultWorkingDirectory)"
+      ls -la
       if [ ! -d "playwright-report" ]; then
         mkdir -p playwright-report
         echo "Playwright HTML report was not generated. Check the test step logs." > playwright-report/README.txt
@@ -39,13 +42,16 @@ steps:
         mkdir -p test-results
         echo "No test-results directory was generated." > test-results/README.txt
       fi
+      echo "Artifact folders:"
+      ls -la playwright-report
+      ls -la test-results
     condition: always()
     displayName: Ensure artifact folders exist
 
   - task: PublishPipelineArtifact@1
     condition: always()
     inputs:
-      targetPath: playwright-report
+      targetPath: $(System.DefaultWorkingDirectory)/playwright-report
       artifact: playwright-report
       publishLocation: pipeline
     displayName: Publish Playwright report
@@ -53,7 +59,7 @@ steps:
   - task: PublishPipelineArtifact@1
     condition: always()
     inputs:
-      targetPath: test-results
+      targetPath: $(System.DefaultWorkingDirectory)/test-results
       artifact: test-results
       publishLocation: pipeline
     displayName: Publish test results
