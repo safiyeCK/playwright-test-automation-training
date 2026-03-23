@@ -30,6 +30,18 @@ steps:
   - script: npx playwright test
     displayName: Run Playwright tests
 
+  - script: |
+      if [ ! -d "playwright-report" ]; then
+        mkdir -p playwright-report
+        echo "Playwright HTML report was not generated. Check the test step logs." > playwright-report/README.txt
+      fi
+      if [ ! -d "test-results" ]; then
+        mkdir -p test-results
+        echo "No test-results directory was generated." > test-results/README.txt
+      fi
+    condition: always()
+    displayName: Ensure artifact folders exist
+
   - task: PublishPipelineArtifact@1
     condition: always()
     inputs:
@@ -37,3 +49,11 @@ steps:
       artifact: playwright-report
       publishLocation: pipeline
     displayName: Publish Playwright report
+
+  - task: PublishPipelineArtifact@1
+    condition: always()
+    inputs:
+      targetPath: test-results
+      artifact: test-results
+      publishLocation: pipeline
+    displayName: Publish test results
