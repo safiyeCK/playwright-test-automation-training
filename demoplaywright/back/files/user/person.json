@@ -1,0 +1,42 @@
+[
+  {
+    "Id": 1,
+    "Type": "person",
+    "fullName": "Jan de vries",
+    "age": 55,
+    "sex": "Male",
+    "hasPet": true
+  },
+  {
+    "Id": 2,
+    "Type": "person",
+    "fullName": "Tineke de Jong",
+    "age": 34,
+    "sex": "Female",
+    "hasPet": true
+  },
+  {
+    "Id": 3,
+    "Type": "person",
+    "fullName": "Andre Hazes",
+    "age": 72,
+    "sex": "Male",
+    "hasPet": false
+  },
+  {
+    "Id": 4,
+    "Type": "person",
+    "fullName": "Jan Smit",
+    "age": 14,
+    "sex": "Male",
+    "hasPet": false
+  },
+  {
+    "Id": 5,
+    "Type": "person",
+    "fullName": "Steve Jobs",
+    "age": 99,
+    "sex": "Male",
+    "hasPet": false
+  }
+]

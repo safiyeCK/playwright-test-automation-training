@@ -1,88 +1,114 @@
-import { test, expect} from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import dotenv from 'dotenv';
+import { LoginPage } from '../pages/LoginPage';
 
 dotenv.config();
 
-test.describe('Login Positive Scenarios', () => {
-  test.beforeEach(async ({ page }) => {
-      const baseURL= process.env.BASE_URL!;
-      await page.goto(baseURL);
-  });
-  
-  test('should login successfully with Ok button', async ({ page }) => {
-  
-    const username= process.env.LOGIN_USERNAME!;
-    const password= process.env.LOGIN_PASSWORD!;    
-    const loginbox = page.locator('.login-box');
-    
-    await expect(loginbox.getByRole('textbox', { name: 'Username' })).toBeVisible();
-    await expect(loginbox.getByRole('textbox', { name: 'Password' })).toBeVisible();
-    
-    await loginbox.getByRole('textbox', { name: 'Username' }).fill(username);
-    await loginbox.getByRole('textbox', { name: 'Password' }).fill(password);
-    await loginbox.getByRole('button', { name: 'Ok' }).click();
+  const username = process.env.LOGIN_USERNAME!;
+  const password = process.env.LOGIN_PASSWORD!;
+let loginPage: LoginPage;
 
-    await expect(page.getByRole('link', { name: 'Persons' })).toBeVisible();
+test.describe('Login Positive Scenarios', () => {
+   test.describe.configure({ mode: 'serial' });
+  
+  test.beforeEach(async ({ page }) => {
+    loginPage = new LoginPage(page);
+    await loginPage.goto();
+  });
+
+  test('should login successfully with Ok button', async ({ page }) => {
     
-  });   
+   
+
+    await test.step('Verify login form is visible', async () => {
+      await loginPage.isLoginBoxVisible();
+    });
+
+    await test.step('Fill valid credentials and click Ok', async () => {
+      await loginPage.login(username, password);
+     
+    });
+
+    await test.step('Verify user is redirected after login', async () => {
+      await loginPage.isPersonsLinkVisible();
+
+    });
+  });
 
   test('should login successfully with Enter key', async ({ page }) => {
+    
+    await test.step('Verify login form is visible', async () => {
+     await loginPage.isLoginBoxVisible();
+    });
 
-    const username= process.env.LOGIN_USERNAME!;
-    const password= process.env.LOGIN_PASSWORD!;
+    await test.step('Fill valid credentials and submit with Enter', async () => {
+      await loginPage.login(username, password);
+      await loginPage.pressEnterOnPassword();
+    });
 
-    const loginbox = page.locator('.login-box');
-    await expect(loginbox.getByRole('textbox', { name: 'Username' })).toBeVisible();
-    await expect(loginbox.getByRole('textbox', { name: 'Password' })).toBeVisible();
-
-    await loginbox.getByRole('textbox', { name: 'Username' }).fill(username);
-    await loginbox.getByRole('textbox', { name: 'Password' }).fill(password);
-    await loginbox.getByRole('textbox', { name: 'Password' }).press('Enter');
-
-    await expect(page.getByRole('link', { name: 'Persons' })).toBeVisible();
+    await test.step('Verify user is redirected after login', async () => {
+      await loginPage.isPersonsLinkVisible();
+    });
   });
 
- 
+  test('should show info message after clicking Info button', async ({ page }) => {
 
-test.describe('Login Negative Secenarios' , () =>{
-  
-   test('should show error message for invalid credentials', async ({ page }) => { 
-    const loginbox = page.locator('.login-box');
-    await loginbox.getByRole('textbox', { name: 'Username' }).fill('invalidUser');
-    await loginbox.getByRole('textbox', { name: 'Password' }).fill('invalidPass');
-    await loginbox.getByRole('button', { name: 'Ok' }).click();
-    await expect(loginbox.getByText('😕 Oeps! invalid user. Try again or contact the adminstrator')).toBeVisible();
- 
- });
- test('should show error message for empty credentials', async ({ page }) => {
-    const loginbox = page.locator('.login-box');
-    await loginbox.getByRole('button', { name: 'Ok' }).click();
-    await expect(loginbox.getByText('😕 Oeps! invalid user. Try again or contact the adminstrator')).toBeVisible()
-    ;
+    await test.step('Click the Info button', async () => {
+      await loginPage.clickInfoButton();
+    });
 
-});
-test('should show error message for empty username', async ({ page }) => {
-    const loginbox = page.locator('.login-box');
-    await loginbox.getByRole('textbox', { name: 'Password' }).fill('somepassword');
-    await loginbox.getByRole('button', { name: 'Ok' }).click();
-    await expect(loginbox.getByText('😕 Oeps! invalid user. Try again or contact the adminstrator')).toBeVisible()
-    ;
+    await test.step('Verify info/help text is displayed', async () => {
+      await loginPage.getInfoMessage();
+    });
+  });
 
-});
-test('should show error message for empty password', async ({ page }) => {
-    const loginbox = page.locator('.login-box');
-    await loginbox.getByRole('textbox', { name: 'Username' }).fill('someusername');
-    await loginbox.getByRole('button', { name: 'Ok' }).click();
-    await expect(loginbox.getByText('😕 Oeps! invalid user. Try again or contact the adminstrator')).toBeVisible()
-    ;
-});
+  test.describe('Login Negative Secenarios', () => {
+    test('should show error message for invalid credentials', async ({ page }) => {
+      loginPage = new LoginPage(page);
 
+      await test.step('Fill invalid credentials and submit', async () => {
+        await loginPage.login('invalidUser', 'invalidPass');
+      });
 
-})
+      await test.step('Verify invalid user message', async () => {
+        await loginPage.getInvalidUserMessage();
+      });
+    });
 
- 
+    test('should show error message for empty credentials', async ({ page }) => {
+      loginPage = new LoginPage(page);
 
+      await test.step('Submit login form with empty credentials', async () => {
+        await loginPage.login('', '');
+      });
 
+      await test.step('Verify invalid user message', async () => {
+        await loginPage.getInvalidUserMessage();
+      });
+    });
 
+    test('should show error message for empty username', async ({ page }) => {
+      loginPage = new LoginPage(page);
 
+      await test.step('Fill password only and submit', async () => {
+        await loginPage.login('', 'somepassword');
+      });
+
+      await test.step('Verify invalid user message', async () => {
+        await loginPage.getInvalidUserMessage();
+      });
+    });
+
+    test('should show error message for empty password', async ({ page }) => {
+      loginPage = new LoginPage(page);
+
+      await test.step('Fill username only and submit', async () => {
+        await loginPage.login('someusername', '');
+      });
+
+      await test.step('Verify invalid user message', async () => {
+        await loginPage.getInvalidUserMessage();
+      });
+    });
+  });
 });

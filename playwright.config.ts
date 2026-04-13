@@ -19,7 +19,7 @@ const USE_SERVERS = true;
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-   timeout: 30000,
+  timeout: 30000,
   testDir: './tests',
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -38,13 +38,15 @@ export default defineConfig({
     // baseURL: 'http://localhost:3000',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
+     headless: !!process.env.CI,
     trace: 'on-first-retry',
      testIdAttribute: 'data-test',
        video:{
       mode:'on-first-retry',
-      //size:{width: 1920,height:1080}
-
-    }
+       },
+       viewport: { width: 1440, height: 900 },
+  colorScheme: 'light',
+    
   },
 
   /* Configure projects for major browsers */

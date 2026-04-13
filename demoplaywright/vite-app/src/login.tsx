@@ -32,10 +32,10 @@ const Login: React.FC = () => {
     e.preventDefault();
     const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement;
     if (submitter && submitter.textContent === 'Info') {
-      setInfoMessage(`You can use any username that starts with 'user' the password is always welkom01`);
+      setInfoMessage('Use your assigned training credentials. Contact the admin if needed.');
       return;
     }
-    setInfoMessage(``);
+    setInfoMessage('');
 
     let res: Response | undefined = undefined;
     let retryCount = 0;

@@ -51,6 +51,8 @@ npx playwright test
 npx playwright test --ui
 npx playwright test --headed
 npx playwright test --debug
+npx playwright test --trace on  
+npx playwright test show --report
 ```
 
 ## CI (Azure DevOps)
