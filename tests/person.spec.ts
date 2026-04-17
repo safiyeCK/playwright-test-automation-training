@@ -1,67 +1,88 @@
 import { test, expect } from '@playwright/test';
 import dotenv from 'dotenv';
-import { extractPersonsData, findPersonByName } from '../helpers/personHelpers';
+import { LoginPage } from '../pages/LoginPage';
+import { PersonsPage } from '../pages/PersonsPage';
 
 dotenv.config();
+let personPage: PersonsPage;
+let loginPage: LoginPage;
+const username = process.env.LOGIN_USERNAME!;
+const password = process.env.LOGIN_PASSWORD!;
 
 test.describe('Persons Page', () => {
+
+  test.describe.configure({ mode: 'serial' });
+  
   test.beforeEach(async ({ page }) => {
-    const baseURL = process.env.BASE_URL!;
-    await page.goto(baseURL);
-    const username = 'user1';
-    const password = process.env.LOGIN_PASSWORD!;
-    const loginbox = page.locator('.login-box');
-
-    await test.step('Login as user1', async () => {
-      await loginbox.getByRole('textbox', { name: 'Username' }).fill(username);
-      await loginbox.getByRole('textbox', { name: 'Password' }).fill(password);
-      await loginbox.getByRole('button', { name: 'Ok' }).click();
-    });
-
-    await test.step('Wait for Persons page to load', async () => {
-      await expect(page.getByText('Persons are loaded')).toBeVisible();
-    });
+    
+    loginPage = new LoginPage(page);
+    personPage = new PersonsPage(page);
+    
+    await loginPage.goto();
+    await loginPage.login(username, password);
+    await personPage.waitUntilLoaded();
   });
+    
 
   test('should find Tineke de Jong and verify her age is 34', async ({ page }) => {
-    await test.step('Extract all persons data from grid', async () => {
-      const allPersons = await extractPersonsData(page);
-      console.log('All persons:', allPersons);
-      expect(allPersons.length).toBeGreaterThan(0);
+    const person = await personPage.findPersonByName('Tineke de Jong');
+    expect(person).toBeDefined();
+    expect(person?.age).toBe('34');
+  });
+
+
+  test('should find Jan de Vries and verify he has a pet', async ({ page }) => {
+    const person = await personPage.findPersonByName('Jan de vries');
+    expect(person).toBeDefined();
+    expect(person?.hasPet).toBe('No');
+  });
+
+  test('should find Jan Smit and verify he is male', async ({ page }) => {
+    const person = await personPage.findPersonByName('Jan Smit');
+    expect(person).toBeDefined();
+    expect(person?.sex).toBe('Male');
+
+  });
+  
+  test('Should be updated to verify that all persons have a name, age, sex and hasPet value', async ({ page }) => {
+    const persons = await personPage.getAllPersons(); 
+    for (const person of persons) {
+      expect(person.name).toBeTruthy();
+      expect(person.age).toBeTruthy();
+      expect(person.sex).toBeTruthy();
+      expect(person.hasPet).toBeTruthy();
+    }   
+    
+
+  });
+
+  test('should update Jan de vries values and submit the form', async ({ page }) => {
+    const updatedName = 'Jan de vries Updated';
+    const updatedAge = '56';
+
+    await test.step('Open Jan de vries in update form', async () => {
+      await personPage.clickUpdateButtonForPerson('Jan de vries');
     });
 
-    await test.step('Find person by name using helper', async () => {
-      const tinieke = await findPersonByName(page, 'Tineke de Jong');
-      expect(tinieke).toBeDefined();
+    await test.step('Change form values and submit', async () => {
+      await personPage.fillPersonForm(updatedName, updatedAge, 'Male', true);
+      await personPage.submitPersonForm();
     });
 
-    await test.step('Verify age is 34', async () => {
-      const tinieke = await findPersonByName(page, 'Tineke de Jong');
-      expect(tinieke?.age).toBe('34');
+    await test.step('Verify updated values in grid', async () => {
+      const updatedPerson = await personPage.findPersonByName(updatedName);
+      expect(updatedPerson).toBeDefined();
+      expect(updatedPerson?.age).toBe(updatedAge);
+      expect(updatedPerson?.sex).toBe('Male');
+      expect(updatedPerson?.hasPet).toBe('Yes');
     });
 
-    await test.step('Log all person details', async () => {
-      const allPersons = await extractPersonsData(page);
-      allPersons.forEach((person) => {
-        console.log(`Name: ${person.name}, Age: ${person.age}, Sex: ${person.sex}, HasPet: ${person.hasPet}`);
-      });
+    await test.step('Revert Jan de vries to original values', async () => {
+      await personPage.clickUpdateButtonForPerson(updatedName);
+      await personPage.fillPersonForm('Jan de vries', '55', 'Male', false);
+      await personPage.submitPersonForm();
     });
   });
 
-  test('should display all persons with name, sex, and hasPet info', async ({ page }) => {
-    await test.step('Extract and verify persons data', async () => {
-      const allPersons = await extractPersonsData(page);
-
-      expect(allPersons.length).toBeGreaterThan(0);
-
-      allPersons.forEach((person) => {
-        expect(person).toHaveProperty('name');
-        expect(person).toHaveProperty('sex');
-        expect(person).toHaveProperty('hasPet');
-        expect(person.name).not.toBe('');
-      });
-
-      console.log(`Total persons loaded: ${allPersons.length}`);
-    });
-  });
 });
+

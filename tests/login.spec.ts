@@ -25,7 +25,8 @@ test.describe('Login Positive Scenarios', () => {
     });
 
     await test.step('Fill valid credentials and click Ok', async () => {
-      await loginPage.login(username, password);
+      await loginPage.fillCredentialsLoginBox(username, password);
+      await loginPage.pressOkButton();
      
     });
 
@@ -42,7 +43,7 @@ test.describe('Login Positive Scenarios', () => {
     });
 
     await test.step('Fill valid credentials and submit with Enter', async () => {
-      await loginPage.login(username, password);
+      await loginPage.fillCredentialsLoginBox(username, password);
       await loginPage.pressEnterOnPassword();
     });
 
