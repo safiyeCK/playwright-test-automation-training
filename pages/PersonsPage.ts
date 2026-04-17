@@ -1,4 +1,4 @@
-import { expect, Page } from '@playwright/test';
+import { expect, Locator, Page } from '@playwright/test';
 
 export type PersonRow = {
   name: string;
@@ -9,23 +9,25 @@ export type PersonRow = {
 
 export class PersonsPage {
   readonly page: Page;
+  readonly loadedMessage: Locator;
+  readonly rows: Locator;
 
     constructor(page: Page) {
         this.page = page;
-        
+        this.loadedMessage = page.getByText('Persons are loaded');
+        this.rows = page.getByRole('row');
     }
 
   async waitUntilLoaded(): Promise<void> {
-    await expect(this.page.getByText('Persons are loaded')).toBeVisible();
+    await expect(this.loadedMessage).toBeVisible();
   }
 
   async getAllPersons(): Promise<PersonRow[]> {
-    const rows = this.page.getByRole('row');
-    const rowCount = await rows.count();
+    const rowCount = await this.rows.count();
     const persons: PersonRow[] = [];
 
     for (let index = 1; index < rowCount; index++) {
-      const row = rows.nth(index);
+      const row = this.rows.nth(index);
       const cells = row.getByRole('cell');
 
       persons.push({

@@ -12,10 +12,25 @@ const baseURL = process.env.BASE_URL!;
 
 export class LoginPage {
     readonly page: Page;
+    readonly loginBox: Locator;
+    readonly usernameInput: Locator;
+    readonly passwordInput: Locator;
+    readonly okButton: Locator;
+    readonly infoButton: Locator;
+    readonly invalidUserMessage: Locator;
+    readonly personsLink: Locator;
+    readonly infoMessage: Locator;
 
     constructor(page: Page) {
         this.page = page;
-        
+        this.loginBox = page.locator('.login-box');
+        this.usernameInput = this.loginBox.getByRole('textbox', { name: 'Username' });
+        this.passwordInput = this.loginBox.getByRole('textbox', { name: 'Password' });
+        this.okButton = this.loginBox.getByRole('button', { name: 'Ok' });
+        this.infoButton = this.loginBox.getByRole('button', { name: 'Info' });
+        this.invalidUserMessage = page.getByText(INVALID_USER_MESSAGE);
+        this.personsLink = page.getByRole('link', { name: 'Persons' });
+        this.infoMessage = page.getByText(INFO_MESSAGE);
     }
 
     async goto() {
@@ -23,41 +38,36 @@ export class LoginPage {
      };
 
      async isLoginBoxVisible() {
-        const loginbox = this.page.locator('.login-box');
-        await expect(loginbox.getByRole('textbox', { name: 'Username' })).toBeVisible();
-        await expect(loginbox.getByRole('textbox', { name: 'Password' })).toBeVisible();
+        await expect(this.usernameInput).toBeVisible();
+        await expect(this.passwordInput).toBeVisible();
      }
 
     async login(username: string, password: string) {
-        const loginbox = this.page.locator('.login-box');
-        await loginbox.getByRole('textbox', { name: 'Username' }).fill(username);
-        await loginbox.getByRole('textbox', { name: 'Password' }).fill(password);
-        await loginbox.getByRole('button', { name: 'Ok' }).click();
+        await this.usernameInput.fill(username);
+        await this.passwordInput.fill(password);
+        await this.okButton.click();
             
      }
 
      async getInvalidUserMessage() {
-        return await this.page.getByText(INVALID_USER_MESSAGE);
+        return this.invalidUserMessage;
      }
   
 
      async isPersonsLinkVisible() {
-        return await this.page.getByRole('link', { name: 'Persons' }).isVisible();
+        return await this.personsLink.isVisible();
      }
      async pressEnterOnPassword() {
-        const loginbox = this.page.locator('.login-box');
-        await loginbox.getByRole('textbox', { name: 'Password' }).press('Enter');   
+        await this.passwordInput.press('Enter');   
      }
 
      async clickInfoButton() {
-        const loginbox = this.page.locator('.login-box');
-        const infoButton = loginbox.getByRole('button', { name: 'Info' });
-        await expect(infoButton).toBeVisible();
-        await infoButton.click();
+        await expect(this.infoButton).toBeVisible();
+        await this.infoButton.click();
      }  
     
      async getInfoMessage() {
-        return await this.page.getByText(INFO_MESSAGE);
+        return this.infoMessage;
      }
 
 }
