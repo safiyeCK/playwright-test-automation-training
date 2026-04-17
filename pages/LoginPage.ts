@@ -42,11 +42,18 @@ export class LoginPage {
         await expect(this.passwordInput).toBeVisible();
      }
 
-    async login(username: string, password: string) {
+    async fillCredentialsLoginBox(username: string, password: string) {
         await this.usernameInput.fill(username);
         await this.passwordInput.fill(password);
+     }
+
+    async pressOkButton() {
         await this.okButton.click();
-            
+     }
+
+    async login(username: string, password: string) {
+        await this.fillCredentialsLoginBox(username, password);
+        await this.pressOkButton();
      }
 
      async getInvalidUserMessage() {
