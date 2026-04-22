@@ -10,6 +10,7 @@ export type PersonRow = {
 export class PersonsPage {
   readonly page: Page;
   readonly loadedMessage: Locator;
+  readonly personsTable: Locator;
   readonly rowsPerson: Locator;
   readonly fullNameInput: Locator;
   readonly ageInput: Locator;
@@ -20,6 +21,7 @@ export class PersonsPage {
     constructor(page: Page) {
         this.page = page;
         this.loadedMessage = page.getByText('Persons are loaded');
+      this.personsTable = page.locator('table').first();
         this.rowsPerson = page.getByRole('row');
         this.fullNameInput = page.locator('#fullName');
         this.ageInput = page.locator('#age');
@@ -80,5 +82,11 @@ export class PersonsPage {
   async submitPersonForm() {
     await this.submitButton.click();
     await this.waitUntilLoaded();
+  }
+  async isPersonsTableVisible() {
+    await expect(this.personsTable).toBeVisible();
+  }
+  async isPersoneloadedMessageVisible() {
+    await expect(this.loadedMessage).toBeVisible();
   }
 }

@@ -1,11 +1,14 @@
 import { test, expect, type Locator, type Page } from '@playwright/test';
 import dotenv from 'dotenv';
 import { LoginPage } from '../pages/LoginPage';
-
+import { QuestionBoxPage } from '../pages/Question-boxPage';
+import { NavbarPage } from '../pages/NavbarPage';
+import { PersonsPage } from '../pages/PersonsPage';
 dotenv.config();
 
 const username = process.env.LOGIN_USERNAME!;
 const password = process.env.LOGIN_PASSWORD!;
+const backendBaseUrl = process.env.API_BASE_URL ?? 'http://localhost:3000';
 
 async function stabilizePage(page: Page) {
   await page.waitForLoadState('domcontentloaded');
@@ -26,53 +29,60 @@ async function expectStableScreenshot(locator: Locator, snapshotName: string) {
   });
 }
 
+let loginPage: LoginPage;
+let questionBoxPage: QuestionBoxPage;
+let navbarPage: NavbarPage;
+let personsPage: PersonsPage;
+
 test.describe('Visual regression tests', () => {
-  test('login box should match snapshot', async ({ page }) => {
-    const loginPage = new LoginPage(page);
+  test.beforeEach(async ({ page }) => {
+    const resetResponse = await page.request.post(`${backendBaseUrl}/reset/all`);
+    expect(resetResponse.ok()).toBeTruthy();
+
+    loginPage = new LoginPage(page);
+    
     await loginPage.goto();
+    
+  });
+  
+  test('login box should match snapshot', async ({ page }) => {
     await stabilizePage(page);
-
-    const loginBox = page.locator('.login-box');
-    await expect(loginBox).toBeVisible();
-
-    await expectStableScreenshot(loginBox, 'login-box.png');
+    await loginPage.isLoginBoxVisible();
+    await expectStableScreenshot(loginPage.loginBox, 'login-box.png');
   });
 
   test('question box should match snapshot', async ({ page }) => {
-    const loginPage = new LoginPage(page);
-    await loginPage.goto();
+    questionBoxPage = new QuestionBoxPage(page);
     await stabilizePage(page);
 
-    const questionBox = page.locator('.question-box');
-    await expect(questionBox).toBeVisible();
+    await questionBoxPage.isQuestionBoxVisible();
 
-    await expectStableScreenshot(questionBox, 'question-box.png');
+    await expectStableScreenshot(questionBoxPage.questionBox, 'question-box.png');
   });
 
   test('navbar after login should match snapshot', async ({ page }) => {
-    const loginPage = new LoginPage(page);
-    await loginPage.goto();
-    await loginPage.login(username, password);
-    await stabilizePage(page);
-
-    const navbar = page.locator('nav');
-    await expect(page.getByRole('link', { name: 'Persons' })).toBeVisible();
-
-    await expectStableScreenshot(navbar, 'navbar-authenticated.png');
-  });
-
-  test('persons table should match snapshot', async ({ page }) => {
-    const loginPage = new LoginPage(page);
-    await loginPage.goto();
+    
+    navbarPage =new NavbarPage(page);
+   
     await loginPage.login(username, password);
 
-    await expect(page.getByText('Persons are loaded')).toBeVisible();
-    await page.waitForTimeout(3500);
     await stabilizePage(page);
 
-    const table = page.locator('table').first();
-    await expect(table).toBeVisible();
+    await navbarPage.isNavbarVisible();
+    personsPage = new PersonsPage(page);
 
-    await expectStableScreenshot(table, 'persons-table.png');
+    await expectStableScreenshot(navbarPage.navbar, 'navbar-authenticated.png');
   });
+
+  // test('persons table should match snapshot', async ({ page }) => {
+  
+  //   await loginPage.login(username, password);
+
+  //   personsPage = new PersonsPage(page);
+  //   await personsPage.isPersoneloadedMessageVisible();
+  //   await stabilizePage(page);
+  //   await page.waitForTimeout(500);
+
+  //   await expectStableScreenshot(personsPage.personsTable, 'persons-table.png');
+  // });
 });

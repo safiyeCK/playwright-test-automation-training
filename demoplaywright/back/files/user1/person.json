@@ -5,7 +5,7 @@
     "fullName": "Jan de vries",
     "age": 55,
     "sex": "Male",
-    "hasPet": false
+    "hasPet": true
   },
   {
     "Id": 2,

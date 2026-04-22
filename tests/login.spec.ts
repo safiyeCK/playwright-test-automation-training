@@ -18,8 +18,6 @@ test.describe('Login Positive Scenarios', () => {
 
   test('should login successfully with Ok button', async ({ page }) => {
     
-   
-
     await test.step('Verify login form is visible', async () => {
       await loginPage.isLoginBoxVisible();
     });
